@@ -2089,7 +2089,7 @@ function is_master_nameserver()
            ;;
         master[123]:* )
            rc=0
-           ;;
+           ;;      
         * )
            rc=1
            ;;
