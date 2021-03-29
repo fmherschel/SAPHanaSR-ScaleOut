@@ -129,7 +129,7 @@ function saphana_usage() {
     The 'start'        operation starts the HANA instance or bring the "clone instance" to a WAITING status
     The 'stop'         operation stops the HANA instance
     The 'status'       operation reports whether the HANA instance is running
-    The 'monitor'      operation reports whether the HANA instance seems to be working in master/slave it also needs to check the system replication status
+    The 'monitor'      operation reports whether the HANA instance seems to be working in multi-state it also needs to check the system replication status
     The 'promote'      operation either runs a takeover for a secondary or a just-nothing for a primary
     The 'demote'       operation neary does nothing and just mark the instance as demoted
     The 'notify'       operation always returns SUCCESS
@@ -313,7 +313,7 @@ function dequote()
     local rc=0; tr -d '"'; return $rc
 }
 
-# function: version: cpmpare two HANA version strings
+# function: version: compare two HANA version strings
 function ver_lt() {
     ocf_version_cmp $1 $2
     test $? -eq 0 && return 0 || return 1
@@ -334,7 +334,7 @@ function ver_ge() {
     test $? -eq 2 -o $? -eq 1 && return 0 || return 1
 }
 #
-# function: version: cpmpare two HANA version strings
+# function: version: compare two HANA version strings
 #
 function version() {
     if [ $# -eq 3 ]; then
@@ -378,10 +378,10 @@ function get_action_timeout() {
 }
 
 #
-# function: is_clone - report, if resource is configured as a clone (also master/slave)
+# function: is_clone - report, if resource is configured as a clone (also multi-state)
 # params:   -
 # globals:  OCF_*(r)
-# descript: is_clone : find out if we are configured to run in a Master/Slave configuration
+# descript: is_clone : find out if we are configured to run in a multi-state configuration
 # rc: 0: it is a clone, 1: it is not a clone
 #
 # DONE: PRIO2: For the first shipment (scale-out) we need to limit the clones to 2
