@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+#
+##########################################################################
+#
+# calcTimes
+#
+# Author:       Fabian Herschel, August 2021
+# Support:      linux@sap.com
+# License:      GNU General Public License 2 (GPLv2)
+# Copyright (c) 2021 SUSE LLC.
+#
+##########################################################################
+#
+
+my $firstHit=0;
+my $startTime=0;
+my $newTime=0;
+
+while (<>) {
+  chomp();
+  if (/([0-9]+):([0-9]+):([0-9]+):/) {
+    $newTime = $1*3600+$2*60+$3;
+    if ( $firstHit == 0 ) {
+      $startTime = $newTime;
+      $firstHit = 1;
+    }
+    printf("%s ( %s ) => %s\n", $newTime, $newTime - $startTime, $_);
+  }
+}
