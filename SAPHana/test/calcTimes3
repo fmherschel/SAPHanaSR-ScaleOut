@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+#
+##########################################################################
+#
+# calcTimes3
+#
+# Author:       Fabian Herschel, August 2021
+# Support:      linux@sap.com
+# License:      GNU General Public License 2 (GPLv2)
+# Copyright (c) 2021 SUSE LLC.
+#
+##########################################################################
+#
+use strict;
+my $firstHit=0;
+my $startTime=0;
+my $newTime=0;
+my $function="";
+my %functTimes;
+my %functTimesSum;
+my %functTimesCount;
+my $totalTime=0;
+my $runTime="-";
+
+while (<>) {
+  chomp();
+  if (/([0-9]+):([0-9]+):([0-9]+): ([^:]+):/) {
+    $newTime = $1*3600+$2*60+$3;
+    $function = $4;
+    if ( $firstHit == 0 ) {
+      $startTime = $newTime;
+      $firstHit = 1;
+    }
+    if ( /FLOW.*\(/ ) {
+      #
+      # begin time of function found
+      $functTimes{$function}=$newTime;
+      #printf("BEG %s \n", $function);
+    }
+    if ( /FLOW.*rc=/ ) {
+      #
+      # end time of function found
+      $runTime = $newTime - $functTimes{$function};
+      if ( defined $functTimesSum{$function} ) {
+        $functTimesSum{$function} += $runTime;
+        # printf("B functTimesCount{%s}=%s\n", $function, $functTimesCount{$function});
+        $functTimesCount{$function} += 1;
+        # printf("C functTimesCount{%s}=%s\n", $function, $functTimesCount{$function});
+      } else {
+        $functTimesSum{$function} = $runTime;
+        $functTimesCount{$function}=1;
+        # printf("A functTimesCount{%s}=%s\n", $function, $functTimesCount{$function});
+      }
+      #printf("END %s %s \n", $function, $runTime);
+    } else {
+      $runTime = "-";
+    }
+  }
+}
+
+my $key;
+for  $key  ( sort(keys(%functTimesSum)) ) {
+     printf("%-32s %5ss %5sc \n", $key, $functTimesSum{$key}, $functTimesCount{$key} );
+     $totalTime += $functTimesSum{$key};
+}
