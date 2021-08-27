@@ -2,7 +2,7 @@
 #
 # SAPHanaSR-show-hadr-runtimes
 #
-# Description:  
+# Description:
 #              Analyses SAP HANA nameserver trace files and calculates HA/DR hook script run times.
 #              Only for specific known SUSE HA/DR providers.
 #              Work in progress.
@@ -23,7 +23,7 @@ use strict;
 # use as filter (for first)
 # nameserver_suse11.31001.002.trc:
 # [7138]{-1}[-1/-1] 2021-08-19 15:44:50.974343 i ha_dr_slow       slow.py(00049) : slow.srConnectionChanged() method end with rc=0
-# 
+#
 # [<ID>]<dont-know-what-that-is> <date> <time> <level> <who> <where> <message>
 # <ID>: Number ([0-9]+)
 # <dont-know-what-that-is>: Skip till whitespace
@@ -59,6 +59,7 @@ my %countId;
 my %doubles;
 my %times;
 my %runtimes;
+my %unifier;
 
 #sub testDoubles
 #{
@@ -133,9 +134,42 @@ while (<>)  {
         #if ( $fWhat =~ /ha_dr_/ ) {
         #    printf("line: %s\n", $_);
         #}
-        if ( 
+
+        #
+        #### detect calls from SAP HANA (could look like...)
+        #ha_dr_provider   PythonProxyImpl.cpp(01276) : calling HA/DR provider SAPHanaSrMultiTarget.srServiceStateChanged(
+        #ha_dr_provider   PythonProxyImpl.cpp(01096) : calling HA/DR provider SAPHanaSrMultiTarget.hookDRConnectionChanged(
+        #ha_dr_provider   HADRProviderManager.cpp(00073) : loading HA/DR Provider ##### UNFORTUNATELY USES A DIFFERENT EVENT NUMBER
+
+        if (
+               ( $fWhat =~ /ha_dr_provider/ ) && ( $fWhere =~ /PythonProxyImpl.cpp/ ) && ( $fMessage =~ /calling HA.DR provider/ ) ||
+               ( $fWhat =~ /ha_dr_provider/ ) && ( $fWhere =~ /HADRProviderManager.cpp/ ) && ( $fMessage =~ /loading HA.DR Provider/ )
+           ) {
+             # we found a new event fo an HA/DR call so we store a event-number-unifier
+
+             if (defined $unifier{$fID}) {
+                 $unifier{$fID} = $unifier{$fID} + 1;
+             } else {
+                 $unifier{$fID} = 1;
+             }
+        }
+
+        $fID = $fID . "-"  . $unifier{$fID};
+
+# [12580]{-1}[-1/-1] 2021-06-14 13:42:28.436937 i ha_dr_SAPHanaSrM SAPHanaSrMultiTarget.py(00039) : SAPHanaSrMultiTarget.init() version 0.180.0.0423.1704
+# SAPHanaSrMultiTarget.init SAPHanaSrMultiTarget.about
+
+        if (
+             (
                ( $fWhat =~ /ha_dr_SAPHanaSrM/ ) && ( $fWhere =~ /SAPHanaSrMultiTarget.py/ ) ||
-               ( $fWhat =~ /ha_dr_SAPHanaSR/ ) && ( $fWhere =~ /SAPHanaSR.py/ ) 
+               ( $fWhat =~ /ha_dr_SAPHanaSR/ ) && ( $fWhere =~ /SAPHanaSR.py/ )
+             ) && !(
+                      # filter away init and about events
+                      ( $fMessage =~ /SAPHanaSrMultiTarget.init/ ) ||
+                      ( $fMessage =~ /SAPHanaSrMultiTarget.about/ ) ||
+                      ( $fMessage =~ /SAPHanaSR.init/ ) ||
+                      ( $fMessage =~ /SAPHanaSR.about/ )
+                   )
            ) {
             #printf("line: %s\n", $_);
             if ( defined $countId{$fID} ) {
@@ -151,9 +185,9 @@ while (<>)  {
                  #printf("stop %s:%s:%s\n", $1, $2, $3);
            }
            # SAPHanaSrMultiTarget.srConnectionChanged() method called with Dict
-           if ( 
+           if (
                  ( $fMessage =~ /SAPHanaSR.srConnectionChanged.*method called with Dict/ ) ||
-                 ( $fMessage =~ /SAPHanaSrMultiTarget.srConnectionChanged.*method called with Dict/ ) 
+                 ( $fMessage =~ /SAPHanaSrMultiTarget.srConnectionChanged.*method called with Dict/ )
               ) {
               #
               # start time mark
@@ -190,7 +224,7 @@ for my $key ( sort(keys(%doubles))) {
     if ( defined $runtimes{$key}->{Start} && defined $runtimes{$key}->{Stop} ) {
         if ( $runtimes{$key}->{Stop} == -1 ) {
             printf("missing stop time: id: %s start: %s\n", $key, $runtimes{$key}->{Stop} - $runtimes{$key}->{Start});
-        } else { 
+        } else {
             my $rt; my $ms;
             $rt = $runtimes{$key}->{Stop} - $runtimes{$key}->{Start};
             $ms = $runtimes{$key}->{StopMicroseconds} - $runtimes{$key}->{StartMicroseconds};
@@ -198,11 +232,11 @@ for my $key ( sort(keys(%doubles))) {
                $rt--;
                $ms = $ms + 1000000;
             }
-            #debug ausgabe
+            #debug output
             #printf("runtime: id: %s rt: %s ms: %s (start: %s, stop: %s)\n", $key, $rt, $ms, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString});
             #printf("lastMessage: id:%s msg: %s\n", $key, $runtimes{$key}->{lastMessage});
 
-            printf("%s %s %s.%s (%s)\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook});
+            printf("%s %s %s.%s (%s) %s\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key);
         }
     }
 }
