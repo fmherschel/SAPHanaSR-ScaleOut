@@ -17,6 +17,20 @@
 #
 # An example usage:
 #      See usage() function below for more details...
+#
+##############################################################################
+#
+# Needs log times to increment continiously
+# cases like he following will lead into error messages:
+#
+#[27074]{-1}[-1/-1] 2021-08-19 15:23:56.089269 i ha_dr_SAPHanaSR  SAPHanaSR.py(00104) : SAPHanaSR (0.180.0.0330.1807) SAPHanaSR.srConnectionChanged method called with Dict={'status': 11, 'is_in_sync': False, 'timestamp': '2021-08-19T15:23:55.699821+02:00', 'database': 'HA1', 'siteName': 'S2', 'service_name': 'indexserver', 'hostname': 'suse12', 'volume': 4, 'system_status': 11, 'reason': '', 'database_status': 11, 'port': '31003'}
+#[27074]{-1}[-1/-1] 2021-08-19 15:23:55.700471 i ha_dr_provider   PythonProxyImpl.cpp(01096) : calling HA/DR provider SAPHanaSR.hookDRConnectionChanged(hostname=suse12, port=31003, volume=4, service_name=indexserver, database=HA1, status=11, database_status=11, system_status=11, timestamp=2021-08-19T15:23:55.699821+02:00, is_in_sync=0, reason=, siteName=S2)
+#
+# As you see the calling PythonProxyImpl.cpp logs after the called SAPHanaSR.py.
+#
+# a work around would be to pre-sort the trace file by fields 2 and 3:
+# sort -k2,3 nameserver_suse11.31001.002.trc | grep '\[27074\].*ha_dr'
+
 
 use strict;
 
