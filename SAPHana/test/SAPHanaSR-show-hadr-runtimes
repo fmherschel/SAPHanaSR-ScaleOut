@@ -226,12 +226,18 @@ while (<>)  {
               }
             } elsif ( $fMessage =~ /ignoring bad SR status because of is_in_sync=True/ ) {
                   $messageType='Ib';
+            } elsif ( $fMessage =~ /Ignoring bad SR status because of is_in_sync=True/ ) {
+                  # ignore thisone
             } elsif ( $fMessage =~ /was called with empty site name. Ignoring call/ ) {
                   $messageType='Ic';
             } elsif ( $fMessage =~ /CALLING CRM:.*hana_.*_gsh/ ) {
-                  $messageType='Cg';
+                  $messageType='Cv';
             } elsif ( $fMessage =~ /CALLING CRM:.*hana_.*_glob_srHook/ ) {
+                  $messageType='Cg';
+            } elsif ( $fMessage =~ /CALLING CRM:.*hana_.*_site_srHook_/ ) {
                   $messageType='Cs';
+            } elsif ( $fMessage =~ /Running srHookGeneration .* see attribute hana_pew_gsh too/ ) {
+                  $messageType='Lv';
             } elsif ( $fMessage =~ /Ignoring bad SR status because of empty site name/ ) {
                   $messageType='Ie';
             } else {
@@ -252,7 +258,8 @@ for my $key ( sort(keys(%doubles))) {
     }
     if ( defined $runtimes{$key}->{Start} && defined $runtimes{$key}->{Stop} ) {
         if ( $runtimes{$key}->{Stop} == -1 ) {
-            printf("missing stop time: id: %s start: %s\n", $key, $runtimes{$key}->{Stop} - $runtimes{$key}->{Start});
+            #printf("missing stop time: id: %s start time: %s %s\n", $key, $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort});
+            printf("%s %s %11s %-16s %-10s %s\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, "---", $runtimes{$key}->{Hook}, $key, "Ds----");
         } else {
             my $rt; my $ms;
             $rt = $runtimes{$key}->{Stop} - $runtimes{$key}->{Start};
