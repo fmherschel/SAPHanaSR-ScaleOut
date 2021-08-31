@@ -207,7 +207,7 @@ while (<>)  {
               #
               # start time mark
               #
-              $messageType='D';
+              $messageType='Ds';
               if ( $fTime =~ /($hour):($minute):($second)\.($msecond)/ ) {
                  $runtimes{$fID}->{Start} = $1 * 3600 + $2 * 60 + $3;
                  $runtimes{$fID}->{StartTimeStringShort} = $1 . ":" . $2 . ":" . $3;
@@ -265,7 +265,8 @@ for my $key ( sort(keys(%doubles))) {
             #printf("runtime: id: %s rt: %s ms: %s (start: %s, stop: %s)\n", $key, $rt, $ms, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString});
             #printf("lastMessage: id:%s msg: %s\n", $key, $runtimes{$key}->{lastMessage});
 
-            printf("%s %s %s.%06i (%s) %s [%s %s] [%s]\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString}, $runtimes{$key}->{Types});
+            #printf("%s %s %s.%06i (%s) %s [%s %s] [%s]\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString}, $runtimes{$key}->{Types});
+            printf("%s %s %4s.%06i %-16s %-10s %s\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key,  $runtimes{$key}->{Types});
         }
     }
 }
