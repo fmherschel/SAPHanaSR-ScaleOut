@@ -138,6 +138,7 @@ for my $key ( sort(keys(%doubles))) {
 
 while (<>)  {
     chomp;
+    my $messageType;
     #    if ( /($idPat)$dnkwti ($date) ($time) ($what) ($where) : ($message)/ ) {
     #if ( /($idPat)$dnkwti ($date) ($time) ($level) ($what) ($where) : ($message)/) {
     if ( /($idPat)$dnkwti$WS($date)$WS($time)$WS($level)$WS($what)$WS($where)$WS:$WS($message)/ ) {
@@ -200,12 +201,13 @@ while (<>)  {
            }
            # SAPHanaSrMultiTarget.srConnectionChanged() method called with Dict
            if (
-                 ( $fMessage =~ /SAPHanaSR.srConnectionChanged.*method called with Dict/ ) ||
+                 ( $fMessage =~ /SAPHanaSR.srConnectionChanged.*method called with Dict/ && !($fMessage =~ /###/) ) ||
                  ( $fMessage =~ /SAPHanaSrMultiTarget.srConnectionChanged.*method called with Dict/ )
               ) {
               #
               # start time mark
               #
+              $messageType='D';
               if ( $fTime =~ /($hour):($minute):($second)\.($msecond)/ ) {
                  $runtimes{$fID}->{Start} = $1 * 3600 + $2 * 60 + $3;
                  $runtimes{$fID}->{StartTimeStringShort} = $1 . ":" . $2 . ":" . $3;
@@ -222,8 +224,21 @@ while (<>)  {
               } else {
                   $doubles{$fID} = 1;
               }
-          }
-        }
+            } elsif ( $fMessage =~ /ignoring bad SR status because of is_in_sync=True/ ) {
+                  $messageType='Ib';
+            } elsif ( $fMessage =~ /was called with empty site name. Ignoring call/ ) {
+                  $messageType='Ic';
+            } elsif ( $fMessage =~ /CALLING CRM:.*hana_.*_gsh/ ) {
+                  $messageType='Cg';
+            } elsif ( $fMessage =~ /CALLING CRM:.*hana_.*_glob_srHook/ ) {
+                  $messageType='Cs';
+            } elsif ( $fMessage =~ /Ignoring bad SR status because of empty site name/ ) {
+                  $messageType='Ie';
+            } else {
+                  $messageType='?';
+            }
+        $runtimes{$fID}->{Types} = $runtimes{$fID}->{Types} . $messageType;
+     }
     }
 }
 
@@ -250,7 +265,7 @@ for my $key ( sort(keys(%doubles))) {
             #printf("runtime: id: %s rt: %s ms: %s (start: %s, stop: %s)\n", $key, $rt, $ms, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString});
             #printf("lastMessage: id:%s msg: %s\n", $key, $runtimes{$key}->{lastMessage});
 
-            printf("%s %s %s.%s (%s) %s\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key);
+            printf("%s %s %s.%06i (%s) %s [%s %s] [%s]\n", $runtimes{$key}->{StartDateString}, $runtimes{$key}->{StartTimeStringShort}, $rt, $ms, $runtimes{$key}->{Hook}, $key, $runtimes{$key}->{StartTimeString}, $runtimes{$key}->{StopTimeString}, $runtimes{$key}->{Types});
         }
     }
 }
