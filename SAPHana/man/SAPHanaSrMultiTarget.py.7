@@ -1,6 +1,6 @@
 .\" Version: 0.180.0
 .\"
-.TH SAPHanaSrMultiTarget.py 7 "09 Aug 2022" "" "SAPHanaSR"
+.TH SAPHanaSrMultiTarget.py 7 "22 Aug 2022" "" "SAPHanaSR"
 .\"
 .SH NAME
 SAPHanaSrMultiTarget.py \- Provider for multi-target aware SAP HANA srHook
@@ -150,7 +150,8 @@ ha_dr_saphanasrmultitarget = info
 /hana/shared/$SID/global/hdb/custom/config/global.ini to enable multi-target aware third site.
 .br
 This entry is needed to allow ocf_suse_SAPHanaController(7) parameter AUTOMATED_REGISTER=true in multi-target environments.
-The HANA has to be stopped before the files can be edited.
+The HANA has to be stopped before the files can be edited. See manual page
+SAPHanaSR-manageProvider(8) for adding the HADR settings online.
 Do not copy the file between nodes. Please check SAP HANA documentation for details.
 .PP
 .RS 2
@@ -352,7 +353,7 @@ Please report any other feedback and suggestions to feedback@suse.com.
 \fBSAPHanaSR-ScaleOut\fP(7) , \fBSAPHanaSR.py\fP(7) ,
 \fBocf_suse_SAPHanaTopology\fP(7) , \fBocf_suse_SAPHanaController\fP(7) , 
 \fBSAPHanaSR-monitor\fP(8) , \fBSAPHanaSR-showAttr\fP(8) ,
-\fBSAPHanaSR-manageAttr\fP(8) ,
+\fBSAPHanaSR-manageAttr\fP(8) , \fBSAPHanaSR-manageProvider\fP(8) ,
 \fBcrm_attribute\fP(8) , \fBsudo\fP(8) , \fBsudoers\fP(5) , \fBpython\fP(8) ,
 .br
 https://documentation.suse.com/sbp/all/?context=sles-sap ,

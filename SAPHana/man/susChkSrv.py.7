@@ -1,6 +1,6 @@
 .\" Version: 0.160.0
 .\"
-.TH susChkSrv.py 7 "09 Aug 2022" "" "SAPHanaSR"
+.TH susChkSrv.py 7 "22 Aug 2022" "" "SAPHanaSR"
 .\"
 .SH NAME
 susChkSrv.py \- Provider for SAP HANA srHook method srServiceStateChanged().
@@ -158,7 +158,8 @@ Usage, syntax or execution errors.
 .PP
 In case of a failing indexserver, the event is logged. No action is performed.
 The section ha_dr_provider_suschksrv is needed on all HANA nodes.
-The HANA has to be stopped before the file can be changed.
+The HANA has to be stopped before the file can be changed. See manual page
+SAPHanaSR-manageProvider(8) for adding the HADR provider settings online.
 .PP
 .RS 2
 [ha_dr_provider_suschksrv]
@@ -184,7 +185,8 @@ The hook script should wait maximum 25 seconds on the sapcontrol command to
 return.
 .br
 The section ha_dr_provider_suschksrv is needed on all HANA nodes.
-The HANA has to be stopped before the file can be changed.
+The HANA has to be stopped before the file can be changed. See manual page
+SAPHanaSR-manageProvider(8) for adding the HADR provider settings online.
 .br
 Note: HANA scale-out is supported only with exactly one master nameserver.
 No HANA host auto-failover.
@@ -369,6 +371,7 @@ Please report any other feedback and suggestions to feedback@suse.com.
 \fBSAPHanaSR\fP(7) , \fBSAPHanaSR-ScaleOut\fP(7) ,  \fBSAPHanaSR.py\fP(7) ,
 \fBocf_suse_SAPHanaTopology\fP(7) , \fBocf_suse_SAPHana\fP(7) ,
 \fBocf_suse_SAPHanaController\fP(7) , \fBSAPHanaSR-hookHelper\fP(8) ,
+\fBSAPHanaSR-manageProvider\fP(8) ,
 \fBcrm\fP(8) , \fBpython3\fP(8) ,
 .br
 https://help.sap.com/docs/SAP_HANA_PLATFORM?locale=en-US
