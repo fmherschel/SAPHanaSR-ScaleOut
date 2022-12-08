@@ -34,7 +34,7 @@
 #     systemReplicationStatus.py (>= SPS090)
 #
 #######################################################################
-SAPHanaControllerVersion="0.184.1"
+SAPHanaControllerVersion="0.184.3"
 # Resource Agent Generation
 RAG="2.0"
 
@@ -1548,11 +1548,25 @@ function saphana_stopSystem() {
     fi
     check_sapstartsrv; rc="$?"
     if [ "$rc" -eq "$OCF_SUCCESS" ]; then
-        ## TODO: PRIO 1: Only stop System, if I am the last master!
-        ## TODO: PRIO 2: Do we need a "last-man-switch-off-the-light" detection?
+        ## DONE: PRIO 1: Only request StopSystem, if I am the last master!
+        ## DONE: PRIO 2: Do we need a "last-man-switch-off-the-light" detection?
         output=$($SAPCONTROL -nr "$InstanceNr" -function "$stopMode")
         rc=$?
-         super_ocf_log info "ACT: SAP HANA STOP: Stopping System $SID-$InstanceName: $output"
+        super_ocf_log info "ACT: SAP HANA STOP: Stopping System $SID-$InstanceName: $output; rc=$rc"
+        if [ $rc -ne 0 ]; then
+            super_ocf_log info "ACT: SAP HANA STOP: cmd=$SAPCONTROL -nr $InstanceNr -function $stopMode"
+	    output=$($SAPCONTROL -nr "$InstanceNr" -function "GetProcessList"); test_rc=$?
+	    super_ocf_log info "ACT: SAP HANA TEST: $SID-$InstanceName: $output; rc=$test_rc"
+	    # try StopSystem again
+		output=$($SAPCONTROL -nr "$InstanceNr" -function "$stopMode")
+		rc=$?
+		super_ocf_log info "ACT: SAP HANA STOP: Stopping System $SID-$InstanceName: $output; rc=$rc"
+        if [ $rc -ne 0 ]; then
+		output=$($SAPCONTROL -nr "$InstanceNr" -function Stop)
+		rc=$?
+		super_ocf_log info "ACT: SAP HANA STOP: Stopping Instance $SID-$InstanceName: $output; rc=$rc"
+	fi
+	fi
     fi
     if [ "$rc" -eq 0 ]; then
         HANA_ACTION_TIMEOUT=$(get_saphana_waitfor_timeout WaitforStopped)
@@ -3474,5 +3488,10 @@ timeE=$(date '+%s')
 (( timeR = timeE - timeB ))
 super_ocf_log debug "DBG: ==== SAPHanaFilter=$SAPHanaFilter"
 super_ocf_log info "RA ==== end action $ACTION$CLACT with rc=${ra_rc} ($SAPHanaControllerVersion) (${timeR}s)===="
+if [ "$ACTION" = "stop" -a "${ra_rc}" = "1" ]; then
+    ra_rc="$OCF_SUCCESS"
+    super_ocf_log info "RA ==== end action $ACTION$CLACT with REMAPPED rc=${ra_rc} ($SAPHanaControllerVersion) (${timeR}s)===="
+    sync
+fi
 exit ${ra_rc}
 # set ts=4 sw=4 sts=4 et
