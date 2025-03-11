@@ -2,7 +2,7 @@
 # spec file for package SAPHanaSR-ScaleOut
 #
 # Copyright (c) 2016      SUSE LINUX GmbH, Nuernberg, Germany.
-# Copyright (c) 2017-2024 SUSE LLC
+# Copyright (c) 2017-2025 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -138,6 +138,7 @@ install -m 0444 srHook/sudoers %{buildroot}/usr/share/%{name}/samples
 /usr/sbin/SAPHanaSR-manageProvider
 /usr/sbin/SAPHanaSR-show-hadr-runtimes
 /usr/sbin/SAPHanaSR-show-hadr-log-coincidence
+%dir /srv/www
 %dir /srv/www/hawk
 %dir /srv/www/hawk/config
 %dir /srv/www/hawk/config/wizard
